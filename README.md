@@ -75,7 +75,8 @@ If Ollama is run from CLI, it is recommended to set `OLLAMA_MODELS` variable.
 
 Ollama exposes an API on port 11434. The service can be reached externally (e.g. `0.0.0.0`) as such:
 ```
-% curl http://<ip_address>:11434/api/generate -d '{"model": "llama3", "prompt": "Which is the Capital city of Italy?", "stream": false}'
+% curl http://<ip_address>:11434/api/generate \
+  -d '{"model": "llama3", "prompt": "Which is the Capital city of Italy?", "stream": false}'
 {
   "model":"llama3",
   "created_at":"2024-09-03T06:05:53.997420619Z",
