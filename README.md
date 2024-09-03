@@ -88,7 +88,8 @@ Ollama exposes an API on port 11434. The service can be reached externally (e.g.
   "prompt_eval_count":18,
   "prompt_eval_duration":8153160000,
   "eval_count":13,
-  "eval_duration":7142811000}%    
+  "eval_duration":7142811000
+}
 ```
 
 Before moving to the next step, terminate the container and clean up the environment:
