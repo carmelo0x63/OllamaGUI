@@ -1,5 +1,5 @@
 # OllamaGUI
-Docker-based setup mixing Ollama and Open WebUI. This setup is recommended for lab use only,s **DO NOT** use it in production!
+Docker-based setup mixing Ollama and Open WebUI. This setup is recommended for lab use only, **DO NOT** use it in production!
 
 This repository is heavily inspired by John Capobianco's series of [YouTube videos](https://www.youtube.com/@johncapobianco2527) and [GitHub repositories](https://github.com/automateyournetwork).
 
