@@ -106,14 +106,14 @@ ollama    ollama/ollama   "/bin/ollama serve"   ollama    2 minutes ago   Up 2 m
 
 The container can still be accessed directly through its name, `docker exec`, or it can be accessed externally through its API. There's no difference in comparison with the previous "manual" approach.
 
-To terminate the container, press `CTRL+C` then, if necessary, run `docker container rm $(docker container ls -aq -f "status=exited")`.
+To terminate the container, simply press `CTRL+C`.<br/>
 
 - Step 2: run the Ollama and Open WebUI containers by means of Docker Compose
 ```
 $ docker compose -f dc2_standalone.yaml up
 ```
 
-This time, two container will be spun up:
+This time, two separate containers will be spun up:
 ```
 $ docker compose ls
 NAME                STATUS              CONFIG FILES
@@ -126,7 +126,7 @@ ollama       ollama/ollama                        "/bin/ollama serve"   ollama  
 open-webui   ghcr.io/open-webui/open-webui:main   "bash start.sh"       ollama-webui   23 seconds ago   Up 22 seconds (health: starting)   0.0.0.0:8090->8080/tcp, :::8090->8080/tcp
 ```
 
-Finally, access the GUI through `http://<ip_address>:8090/`, not authentication is required (hint: see `WEBUI_AUTH=False` in `dc2_openwebui.yaml`)
+Finally, access the GUI through `http://<ip_address>:8090/`, authentication is not required (hint: see `WEBUI_AUTH=False` in `dc2_openwebui.yaml`)<br/>
 
 ![Sample GUI screenshot](./assets/GUI.png)
 
