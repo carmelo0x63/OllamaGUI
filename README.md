@@ -19,7 +19,11 @@ $ sudo mkdir /usr/share/ollama /usr/share/open-webui
 
 ### Run (manual)
 ```
-$ docker run -d -v /usr/share/ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+$ docker run -d \
+  -v /usr/share/ollama:/root/.ollama \
+  -p 11434:11434 \
+  --name ollama \
+  ollama/ollama
 
 
 $ docker exec -it ollama bash
@@ -36,7 +40,6 @@ root@0a438b17cc3b:/# ollama pull llama3
 root@0a438b17cc3b:/# ollama list
 NAME         	ID          	SIZE  	MODIFIED
 llama3:latest	365c0bd3c000	4.7 GB	About a minute ago
-
 
 root@0a438b17cc3b:/# ollama show llama3
   Model
@@ -61,11 +64,11 @@ root@0a438b17cc3b:/# ollama show llama3
 ```
 $ ls -lh /usr/share/ollama/models/blobs
 total 4.4G
--rw-r--r-- 1 root root  485 Sep  3 06:55 sha256-3f8eb4da87fa7a3c9da615036b0dc418d31fef2a30b115ff33562588b32c691d
--rw-r--r-- 1 root root  13K Sep  3 06:55 sha256-4fa551d4f938f68b8c1e6afa9d28befb70e3f33f75d0753248d530364aeea40f
--rw-r--r-- 1 root root  110 Sep  3 06:55 sha256-577073ffcc6ce95b9981eacc77d1039568639e5638e83044994560d9ef82ce1b
--rw-r--r-- 1 root root 4.4G Sep  3 06:55 sha256-6a0746a1ec1aef3e7ec53868f220ff6e389f6f8ef87a01d77c96807de94ca2aa
--rw-r--r-- 1 root root  254 Sep  3 06:55 sha256-8ab4849b038cf0abc5b1c9b8ee1443dca6b93a045c2272180d985126eb40bf6f
+-rw-r--r-- 1 root root  485 Sep  3 06:55 sha256-3f8eb4...
+-rw-r--r-- 1 root root  13K Sep  3 06:55 sha256-4fa551...
+-rw-r--r-- 1 root root  110 Sep  3 06:55 sha256-577073...
+-rw-r--r-- 1 root root 4.4G Sep  3 06:55 sha256-6a0746..
+-rw-r--r-- 1 root root  254 Sep  3 06:55 sha256-8ab484...
 ```
 If Ollama is run from CLI, it is recommended to set `OLLAMA_MODELS` variable.
 
@@ -73,7 +76,19 @@ If Ollama is run from CLI, it is recommended to set `OLLAMA_MODELS` variable.
 Ollama exposes an API on port 11434. The service can be reached externally (e.g. `0.0.0.0`) as such:
 ```
 % curl http://<ip_address>:11434/api/generate -d '{"model": "llama3", "prompt": "Which is the Capital city of Italy?", "stream": false}'
-{"model":"llama3","created_at":"2024-09-03T06:05:53.997420619Z","response":"The capital city of Italy is Rome (Italian: Roma).","done":true,"done_reason":"stop","context":[128006,882,128007,271,23956,374,279,18880,3363,315,15704,30,128009,128006,78191,128007,271,791,6864,3363,315,15704,374,22463,320,70211,25,46601,570],"total_duration":30927400777,"load_duration":15572939780,"prompt_eval_count":18,"prompt_eval_duration":8153160000,"eval_count":13,"eval_duration":7142811000}%    
+{
+  "model":"llama3",
+  "created_at":"2024-09-03T06:05:53.997420619Z",
+  "response":"The capital city of Italy is Rome (Italian: Roma).",
+  "done":true,
+  "done_reason":"stop",
+  "context":[128006,882,128007,271,23956,374,279,18880,3363,...],
+  "total_duration":30927400777,
+  "load_duration":15572939780,
+  "prompt_eval_count":18,
+  "prompt_eval_duration":8153160000,
+  "eval_count":13,
+  "eval_duration":7142811000}%    
 ```
 
 Before moving to the next step, terminate the container and clean up the environment:
@@ -108,7 +123,7 @@ ollama    ollama/ollama   "/bin/ollama serve"   ollama    2 minutes ago   Up 2 m
 
 The container can still be accessed directly through its name, `docker exec`, or it can be accessed externally through its API. There's no difference in comparison with the previous "manual" approach.
 
-To terminate the container, simply press `CTRL+C`.<br/>
+To terminate the container, simply press `CTRL+C`. There is no need to remove the _exited_ containers.<br/>
 
 - Step 2: run the Ollama and Open WebUI containers by means of Docker Compose
 ```
