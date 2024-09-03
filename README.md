@@ -1,5 +1,7 @@
 # OllamaGUI
-Docker-based setup mixing Ollama and Open WebUI
+Docker-based setup mixing Ollama and Open WebUI. This setup is recommended for lab use only,s **DO NOT** use it in production!
+
+---
 
 ### Install
 Prerequisites:
@@ -11,9 +13,12 @@ $ docker pull ollama/ollama:latest
 $ sudo mkdir /usr/share/ollama /usr/share/open-webui
 ```
 
+---
+
 ### Run (manual)
 ```
 $ docker run -d -v /usr/share/ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+
 
 $ docker exec -it ollama bash
 root@0a438b17cc3b:/# ollama -v
@@ -29,6 +34,7 @@ root@0a438b17cc3b:/# ollama pull llama3
 root@0a438b17cc3b:/# ollama list
 NAME         	ID          	SIZE  	MODIFIED
 llama3:latest	365c0bd3c000	4.7 GB	About a minute ago
+
 
 root@0a438b17cc3b:/# ollama show llama3
   Model
@@ -61,31 +67,66 @@ total 4.4G
 ```
 If Ollama is run from CLI, it is recommended to set `OLLAMA_MODELS` variable.
 
-### Run (compose)
-- step 1
-Run the Ollama container in _standalone_ mode.
-```
-$ docker run -d -v /usr/share/ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
-```
 
-The container can be accessed directly by means of:
+Ollama exposes an API on port 11434. The service can be reached externally (e.g. `0.0.0.0`) as such:
 ```
-$ docker exec -it ollama bash
-```
-
-Or, it can be accessed externally through its API (port 11434), as such:
-```
-$ curl http://<ip_address>:11434/api/generate -d '{"model": "llama3", "prompt": "Which is the Capital city of Italy?", "stream": false}'
+% curl http://<ip_address>:11434/api/generate -d '{"model": "llama3", "prompt": "Which is the Capital city of Italy?", "stream": false}'
 {"model":"llama3","created_at":"2024-09-03T06:05:53.997420619Z","response":"The capital city of Italy is Rome (Italian: Roma).","done":true,"done_reason":"stop","context":[128006,882,128007,271,23956,374,279,18880,3363,315,15704,30,128009,128006,78191,128007,271,791,6864,3363,315,15704,374,22463,320,70211,25,46601,570],"total_duration":30927400777,"load_duration":15572939780,"prompt_eval_count":18,"prompt_eval_duration":8153160000,"eval_count":13,"eval_duration":7142811000}%    
 ```
 
-- step 2
-Run the Ollama and Open WebUI containers by means of Docker Compose.
+Before moving to the next step, terminate the container and clean up the environment:
 ```
-$ docker compose -f dc2_standalone.yaml
+$ docker container stop ollama
+
+$ docker container rm $(docker container ls -aq -f "status=exited")
 ```
 
-Finally, access the GUI through `http://<ip_address>:8090/`.
+---
 
-**NOTE**: direct access to Ollama API is still globally (i.e. 0.0.0.0) available on port 11434.
+### Run (compose)
+- Step 1: run the Ollama container in _standalone_ mode
+```
+$ docker compose -f dc1_standalone.yaml up
+[+] Running 2/2
+ ✔ Network ollamagui_default  Created       0.2s
+ ✔ Container ollama           Created       0.1s
+Attaching to ollama
+...
+
+
+$docker compose ls
+NAME                STATUS              CONFIG FILES
+ollamagui           running(1)          /home/toor/github/OllamaGUI/dc1_standalone.yaml
+
+
+$ docker compose -f dc1_standalone.yaml ps
+NAME      IMAGE           COMMAND               SERVICE   CREATED         STATUS         PORTS
+ollama    ollama/ollama   "/bin/ollama serve"   ollama    2 minutes ago   Up 2 minutes   0.0.0.0:11434->11434/tcp, :::11434->11434/tcp
+```
+
+The container can still be accessed directly through its name, `docker exec`, or it can be accessed externally through its API. There's no difference in comparison with the previous "manual" approach.
+
+To terminate the container, press `CTRL+C` then, if necessary, run `docker container rm $(docker container ls -aq -f "status=exited")`.
+
+- Step 2: run the Ollama and Open WebUI containers by means of Docker Compose
+```
+$ docker compose -f dc2_standalone.yaml up
+```
+
+This time, two container will be spun up:
+```
+$ docker compose ls
+NAME                STATUS              CONFIG FILES
+ollamagui           running(2)          /home/toor/github/OllamaGUI/dc2_openwebui.yaml
+
+
+$ docker compose -f dc2_openwebui.yaml ps
+NAME         IMAGE                                COMMAND               SERVICE        CREATED          STATUS                             PORTS
+ollama       ollama/ollama                        "/bin/ollama serve"   ollama         23 seconds ago   Up 22 seconds                      0.0.0.0:11434->11434/tcp, :::11434->11434/tcp
+open-webui   ghcr.io/open-webui/open-webui:main   "bash start.sh"       ollama-webui   23 seconds ago   Up 22 seconds (health: starting)   0.0.0.0:8090->8080/tcp, :::8090->8080/tcp
+```
+
+Finally, access the GUI through `http://<ip_address>:8090/`, not authentication is required (hint: see `WEBUI_AUTH=False` in `dc2_openwebui.yaml`)
+
+![Sample GUI screenshot](./assets/GUI.png)
 
