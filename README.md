@@ -2,6 +2,9 @@
 Docker-based setup mixing Ollama and Open WebUI
 
 ### Install
+Prerequisites:
+- Docker engine
+
 ```
 $ docker pull ollama/ollama:latest
 
@@ -26,7 +29,37 @@ root@0a438b17cc3b:/# ollama pull llama3
 root@0a438b17cc3b:/# ollama list
 NAME         	ID          	SIZE  	MODIFIED
 llama3:latest	365c0bd3c000	4.7 GB	About a minute ago
+
+root@0a438b17cc3b:/# ollama show llama3
+  Model
+  	arch            	llama
+  	parameters      	8.0B
+  	quantization    	Q4_0
+  	context length  	8192
+  	embedding length	4096
+
+  Parameters
+  	stop    	"<|start_header_id|>"
+  	stop    	"<|end_header_id|>"
+  	stop    	"<|eot_id|>"
+  	num_keep	24
+
+  License
+  	META LLAMA 3 COMMUNITY LICENSE AGREEMENT
+  	Meta Llama 3 Version Release Date: April 18, 2024
 ```
+
+**NOTE**: to improve consistency and keep disk space utilization at a minimum, one location is recommended to hold all the model files. In this implementation the chosen location is `/usr/share/ollama/`. For instance:
+```
+$ ls -lh /usr/share/ollama/models/blobs
+total 4.4G
+-rw-r--r-- 1 root root  485 Sep  3 06:55 sha256-3f8eb4da87fa7a3c9da615036b0dc418d31fef2a30b115ff33562588b32c691d
+-rw-r--r-- 1 root root  13K Sep  3 06:55 sha256-4fa551d4f938f68b8c1e6afa9d28befb70e3f33f75d0753248d530364aeea40f
+-rw-r--r-- 1 root root  110 Sep  3 06:55 sha256-577073ffcc6ce95b9981eacc77d1039568639e5638e83044994560d9ef82ce1b
+-rw-r--r-- 1 root root 4.4G Sep  3 06:55 sha256-6a0746a1ec1aef3e7ec53868f220ff6e389f6f8ef87a01d77c96807de94ca2aa
+-rw-r--r-- 1 root root  254 Sep  3 06:55 sha256-8ab4849b038cf0abc5b1c9b8ee1443dca6b93a045c2272180d985126eb40bf6f
+```
+If Ollama is run from CLI, it is recommended to set `OLLAMA_MODELS` variable.
 
 ### Run (compose)
 - step 1
