@@ -7,8 +7,11 @@ This repository is heavily inspired by John Capobianco's series of [YouTube vide
 
 ### Install
 Prerequisites:
-- Docker engine
+- [Docker engine](https://docs.docker.com/engine/install/)
 
+#### Setup
+First off, let's download (`pull`) the official Ollama container image and create a couple of directories to store common files:
+**WARNING**: the next step is likely to require a long time, depending on your network speed.
 ```
 $ docker pull ollama/ollama:latest
 
@@ -18,6 +21,7 @@ $ sudo mkdir /usr/share/ollama /usr/share/open-webui
 ---
 
 ### Run (manual)
+The container can be run manually, that is, through CLI and the `docker` command:
 ```
 $ docker run -d \
   -v /usr/share/ollama:/root/.ollama \
@@ -32,10 +36,12 @@ ollama version is 0.3.9
 ```
 
 **WARNING**: the next step is likely to require a long time, depending on your network speed.
+Users can pick and choose any models, this example is run with `llama3`:
 ```
 root@0a438b17cc3b:/# ollama pull llama3
 ```
 
+Some commands to verify and display what we just did:
 ```
 root@0a438b17cc3b:/# ollama list
 NAME         	ID          	SIZE  	MODIFIED
@@ -60,7 +66,8 @@ root@0a438b17cc3b:/# ollama show llama3
   	Meta Llama 3 Version Release Date: April 18, 2024
 ```
 
-**NOTE**: to improve consistency and keep disk space utilization at a minimum, one location is recommended to hold all the model files. In this implementation the chosen location is `/usr/share/ollama/`. For instance:
+Inside the container, models are stored under `/root/.ollama/models/blobs/` by default. On the host, the corresponding directory is `/usr/share/ollama/models/blobs`.
+**NOTE**: One way to control where models are stored is to set the `OLLAMA_MODELS` environment variable.
 ```
 $ ls -lh /usr/share/ollama/models/blobs
 total 4.4G
@@ -70,8 +77,6 @@ total 4.4G
 -rw-r--r-- 1 root root 4.4G Sep  3 06:55 sha256-6a0746..
 -rw-r--r-- 1 root root  254 Sep  3 06:55 sha256-8ab484...
 ```
-If Ollama is run from CLI, it is recommended to set `OLLAMA_MODELS` variable.
-
 
 Ollama exposes an API on port 11434. The service can be reached externally (e.g. `0.0.0.0`) as such:
 ```
@@ -103,16 +108,20 @@ $ docker container rm $(docker container ls -aq -f "status=exited")
 ---
 
 ### Run (compose)
+Docker Compose offers a way to start/stop containers without getting too involved with the details. Any settings are stored in a YAML file which is then run as such:
 - Step 1: run the Ollama container in _standalone_ mode
 ```
-$ docker compose -f dc1_standalone.yaml up
+$ docker compose --file dc1_standalone.yaml up -d
 [+] Running 2/2
  ✔ Network ollamagui_default  Created       0.2s
  ✔ Container ollama           Created       0.1s
 Attaching to ollama
 ...
+```
+**NOTE**: `-d` runs in `detached` mode. To show the container logs run `docker compose --file <yaml> logs [--follow]`.<br/>
 
-
+Additional checks:<br/>
+```
 $docker compose ls
 NAME                STATUS              CONFIG FILES
 ollamagui           running(1)          /home/toor/github/OllamaGUI/dc1_standalone.yaml
@@ -125,11 +134,11 @@ ollama    ollama/ollama   "/bin/ollama serve"   ollama    2 minutes ago   Up 2 m
 
 The container can still be accessed directly through its name, `docker exec`, or it can be accessed externally through its API. There's no difference in comparison with the previous "manual" approach.
 
-To terminate the container, simply press `CTRL+C`. There is no need to remove the _exited_ containers.<br/>
+To terminate the container, run `docker compose --file <yaml> rm <name>`. There is no need to remove the _exited_ container this time.<br/>
 
 - Step 2: run the Ollama and Open WebUI containers by means of Docker Compose
 ```
-$ docker compose -f dc2_standalone.yaml up
+$ docker compose --file dc2_standalone.yaml up
 ```
 
 This time, two separate containers will be spun up:
