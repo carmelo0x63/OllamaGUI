@@ -10,7 +10,7 @@ Prerequisites:
 - [Docker engine](https://docs.docker.com/engine/install/)
 
 #### Setup
-First off, let's download (`pull`) the official Ollama container image and create a couple of directories to store common files:
+First off, let's download (that is, `pull`) the official Ollama container image and create a couple of directories to store common files:
 **WARNING**: the next step is likely to require a long time, depending on your network speed.
 ```
 $ docker pull ollama/ollama:latest
@@ -25,11 +25,14 @@ The container can be run manually, that is, through CLI and the `docker` command
 ```
 $ docker run -d \
   -v /usr/share/ollama:/root/.ollama \
+  [--gpus all] \
   -p 11434:11434 \
   --name ollama \
   ollama/ollama
+```
+**NOTE**: `--gpus` will only work on specific hardware + software.
 
-
+```
 $ docker exec -it ollama bash
 root@0a438b17cc3b:/# ollama -v
 ollama version is 0.3.9
@@ -142,7 +145,7 @@ ollama    ollama/ollama   "/bin/ollama serve"   ollama    2 minutes ago   Up 2 m
 
 The container can still be accessed directly through its name, `docker exec`, or it can be accessed externally through its API. There's no difference in comparison with the previous "manual" approach.
 
-To terminate the container, run `docker compose --file <yaml> rm <name>`. There is no need to remove the _exited_ container this time.<br/>
+To terminate the container, run `docker compose --file <yaml> down`. There is no need to remove the _exited_ container this time.<br/>
 
 - Step 2: run the Ollama and Open WebUI containers by means of Docker Compose
 ```
