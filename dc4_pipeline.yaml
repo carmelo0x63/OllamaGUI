@@ -34,7 +34,7 @@ services:
       - ollama
 
   document_buddy:
-    image: johncapobianco/document_buddy:document_buddy
+    image: carmelo0x99/document_buddy:document_buddy
     container_name: document_buddy
     restart: always
     build:
