@@ -35,41 +35,35 @@ $ docker run -d \
 ```
 $ docker exec -it ollama bash
 root@0a438b17cc3b:/# ollama -v
-ollama version is 0.3.9
+ollama version is 0.8.0
 ```
 
 **WARNING**: the next step is likely to require a long time, depending on your network speed.
-Users can pick and choose any models, this example is run with `llama3`:
+Users can pick and choose any models, this example is run with `llama3.2:3b`:
 ```
-root@0a438b17cc3b:/# ollama pull llama3
+root@0a438b17cc3b:/# ollama pull llama3.2:latest
 ```
 
-Some commands to verify and display what we just did:
+**NOTE**: models can be searched at https://ollama.com/library
+
+Once the pull is complete, here are some commands to verify and display what we just did:
 ```
 root@0a438b17cc3b:/# ollama list
-NAME         	ID          	SIZE  	MODIFIED
-llama3:latest	365c0bd3c000	4.7 GB	About a minute ago
+NAME               ID              SIZE      MODIFIED       
+llama3.2:latest    a80c4f17acd5    2.0 GB    27 seconds ago
 
-root@0a438b17cc3b:/# ollama show llama3
+root@0a438b17cc3b:/# ollama show llama3.2
   Model
-  	arch            	llama
-  	parameters      	8.0B
-  	quantization    	Q4_0
-  	context length  	8192
-  	embedding length	4096
-
-  Parameters
-  	stop    	"<|start_header_id|>"
-  	stop    	"<|end_header_id|>"
-  	stop    	"<|eot_id|>"
-  	num_keep	24
-
-  License
-  	META LLAMA 3 COMMUNITY LICENSE AGREEMENT
-  	Meta Llama 3 Version Release Date: April 18, 2024
+    architecture        llama
+    parameters          3.2B
+    context length      131072
+    embedding length    3072
+    quantization        Q4_K_M
+...
 ```
 
 Inside the container, models are stored under `/root/.ollama/models/blobs/` by default. On the host, the corresponding directory is `/usr/share/ollama/models/blobs`.
+
 **NOTE**: One way to control where models are stored is to set the `OLLAMA_MODELS` environment variable.
 ```
 root@0a438b17cc3b:/# ls -lh /root/.ollama/models/blobs/
@@ -91,21 +85,26 @@ total 4.4G
 
 Ollama exposes an API on port 11434. The service can be reached externally (e.g. `0.0.0.0`) as such:
 ```
-% curl http://<ip_address>:11434/api/generate \
-  -d '{"model": "llama3", "prompt": "Which is the Capital city of Italy?", "stream": false}'
+% curl -s http://<ip_address>:11434/api/generate \
+  -d '{"model": "llama3.2", "prompt": "Which is the Capital city of Italy?", "stream": false}' \
+  | jq '.'
 {
-  "model":"llama3",
-  "created_at":"2024-09-03T06:05:53.997420619Z",
-  "response":"The capital city of Italy is Rome (Italian: Roma).",
-  "done":true,
-  "done_reason":"stop",
-  "context":[128006,882,128007,271,23956,374,279,18880,3363,...],
-  "total_duration":30927400777,
-  "load_duration":15572939780,
-  "prompt_eval_count":18,
-  "prompt_eval_duration":8153160000,
-  "eval_count":13,
-  "eval_duration":7142811000
+  "model": "llama3.2",
+  "created_at": "2025-05-29T09:58:52.043602763Z",
+  "response": "The capital city of Italy is Rome (Italian: Roma).",
+  "done": true,
+  "done_reason": "stop",
+  "context": [
+    128006,
+    9125,
+    ...
+  ],
+  "total_duration": 214982742,
+  "load_duration": 21489818,
+  "prompt_eval_count": 33,
+  "prompt_eval_duration": 3931930,
+  "eval_count": 13,
+  "eval_duration": 189099164
 }
 ```
 
@@ -113,7 +112,7 @@ Before moving to the next step, terminate the container and clean up the environ
 ```
 $ docker container stop ollama
 
-$ docker container rm $(docker container ls -aq -f "status=exited")
+$ docker container rm $(docker container ls -aq -f "status=exited" -f "status=created")
 ```
 
 ---
@@ -124,16 +123,14 @@ Docker Compose offers a way to start/stop containers without getting too involve
 ```
 $ docker compose --file dc1_standalone.yaml up -d
 [+] Running 2/2
- ✔ Network ollamagui_default  Created       0.2s
- ✔ Container ollama           Created       0.1s
-Attaching to ollama
-...
+ ✔ Network ollamagui_default  Created
+ ✔ Container ollama           Started
 ```
 **NOTE**: `-d` runs in `detached` mode. To show the container logs run `docker compose --file <yaml> logs [--follow]`.<br/>
 
 Additional checks:<br/>
 ```
-$docker compose ls
+$ docker compose ls
 NAME                STATUS              CONFIG FILES
 ollamagui           running(1)          /home/toor/github/OllamaGUI/dc1_standalone.yaml
 
@@ -160,9 +157,9 @@ ollamagui           running(2)          /home/toor/github/OllamaGUI/dc2_openwebu
 
 
 $ docker compose -f dc2_openwebui.yaml ps
-NAME         IMAGE                                COMMAND               SERVICE        CREATED          STATUS                             PORTS
-ollama       ollama/ollama                        "/bin/ollama serve"   ollama         23 seconds ago   Up 22 seconds                      0.0.0.0:11434->11434/tcp, :::11434->11434/tcp
-open-webui   ghcr.io/open-webui/open-webui:main   "bash start.sh"       ollama-webui   23 seconds ago   Up 22 seconds (health: starting)   0.0.0.0:8090->8080/tcp, :::8090->8080/tcp
+NAME         IMAGE                                COMMAND               SERVICE        CREATED          STATUS                    PORTS
+ollama       ollama/ollama                        "/bin/ollama serve"   ollama         23 seconds ago   Up 22 seconds             0.0.0.0:11434->11434/tcp, :::11434->11434/tcp
+open-webui   ghcr.io/open-webui/open-webui:main   "bash start.sh"       ollama-webui   23 seconds ago   Up 22 seconds (healthy)   0.0.0.0:8090->8080/tcp, :::8090->8080/tcp
 ```
 
 Finally, access the GUI through `http://<ip_address>:8090/`, authentication is not required (hint: see `WEBUI_AUTH=False` in `dc2_openwebui.yaml`)<br/>
