@@ -20,7 +20,7 @@ $ sudo mkdir /usr/share/ollama /usr/share/open-webui
 
 ---
 
-### Run (manual)
+### 1. Run manually
 The container can be run manually, that is, through CLI and the `docker` command:
 ```
 $ docker run -d \
@@ -117,7 +117,7 @@ $ docker container rm $(docker container ls -aq -f "status=exited" -f "status=cr
 
 ---
 
-### Run (compose)
+### 2. Run with Docker compose
 Docker Compose offers a way to start/stop containers without getting too involved with the details. Any settings are stored in a YAML file which is then run as such:
 - Step 1: run the Ollama container in _standalone_ mode
 ```
@@ -132,7 +132,7 @@ Additional checks:<br/>
 ```
 $ docker compose ls
 NAME                STATUS              CONFIG FILES
-ollamagui           running(1)          /home/toor/github/OllamaGUI/dc1_standalone.yaml
+ollamagui           running(1)          /home/<user>/github/OllamaGUI/dc1_standalone.yaml
 
 
 $ docker compose -f dc1_standalone.yaml ps
@@ -153,7 +153,7 @@ This time, two separate containers will be spun up:
 ```
 $ docker compose ls
 NAME                STATUS              CONFIG FILES
-ollamagui           running(2)          /home/toor/github/OllamaGUI/dc2_openwebui.yaml
+ollamagui           running(2)          /home/<user>/github/OllamaGUI/dc2_openwebui.yaml
 
 
 $ docker compose -f dc2_openwebui.yaml ps
@@ -165,4 +165,22 @@ open-webui   ghcr.io/open-webui/open-webui:main   "bash start.sh"       ollama-w
 Finally, access the GUI through `http://<ip_address>:8090/`, authentication is not required (hint: see `WEBUI_AUTH=False` in `dc2_openwebui.yaml`)<br/>
 
 ![Sample GUI screenshot](./assets/GUI.png)
+
+---
+
+### 3. Add support for Nvidia GPUs
+
+In case Nvidia GPUs and drivers are available (installation not covered here), the next compose file, `dc3_nvidia.yaml`, adds support for the resources.
+The difference between `dc2_openwebui.yaml` and  `dc3_nvidia.yaml` is:  
+```
+diff dc2_openwebui.yaml dc3_nvidia.yaml                                                                                                                                                                                             1 ↵
+6a7,13
+>     deploy:
+>       resources:
+>         reservations:
+>           devices:
+>             - driver: nvidia
+>               count: 1
+>               capabilities: [ gpu ]
+```
 
